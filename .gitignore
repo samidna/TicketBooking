@@ -1,0 +1,5 @@
+TicketBooking.API/appsettings.json
+TicketBooking.API/appsettings.Development.json
+TicketBooking.API/bin/
+TicketBooking.API/obj/
+.vs/
