@@ -13,3 +13,4 @@ C:\Projects\TicketBooking\TicketBooking.Application\obj\Debug\net8.0\TicketBooki
 C:\Projects\TicketBooking\TicketBooking.Application\obj\Debug\net8.0\refint\TicketBooking.Application.dll
 C:\Projects\TicketBooking\TicketBooking.Application\obj\Debug\net8.0\TicketBooking.Application.pdb
 C:\Projects\TicketBooking\TicketBooking.Application\obj\Debug\net8.0\ref\TicketBooking.Application.dll
+C:\Projects\TicketBooking\TicketBooking.Application\obj\Debug\net8.0\TicketBooking.Application.sourcelink.json

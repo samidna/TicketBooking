@@ -3,7 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TicketBooking.Core.Entities;
+using TicketBooking.Core.Interfaces;
 using TicketBooking.Infrastructure.Data;
+using TicketBooking.Infrastructure.Repositories;
 
 namespace TicketBooking.Infrastructure;
 public static class ServiceRegistration
@@ -37,5 +39,14 @@ public static class ServiceRegistration
         })
         .AddEntityFrameworkStores<AppDbContext>()
         .AddDefaultTokenProviders();
+
+        services.AddScoped<IUnitOfWork, IUnitOfWork>();
+        services.AddScoped(typeof(IGenericRepository<>),typeof(GenericRepository<>));
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<ICityRepository, CityRepository>();
+        services.AddScoped<IVenueRepository, VenueRepository>();
+        services.AddScoped<IEventRepository, EventRepository>();
+        services.AddScoped<ITicketRepository, TicketRepository>();
+        services.AddScoped<IOrderRepository, OrderRepository>();
     }
 }
