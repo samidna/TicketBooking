@@ -6,6 +6,7 @@ using TicketBooking.Core.Entities;
 using TicketBooking.Core.Interfaces;
 using TicketBooking.Infrastructure.Data;
 using TicketBooking.Infrastructure.Repositories;
+using TicketBooking.Infrastructure.Services;
 
 namespace TicketBooking.Infrastructure;
 public static class ServiceRegistration
@@ -48,5 +49,6 @@ public static class ServiceRegistration
         services.AddScoped<IEventRepository, EventRepository>();
         services.AddScoped<ITicketRepository, TicketRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
+        services.AddScoped<IFileService, FileService>();
     }
 }

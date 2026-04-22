@@ -1,5 +1,6 @@
-using TicketBooking.Infrastructure;
+using TicketBooking.API.Middlewares;
 using TicketBooking.Application;
+using TicketBooking.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,13 +13,15 @@ builder.Services.AddSwaggerGen();
 builder.Services.RegisterServiceForInfrastructure(builder.Configuration);
 builder.Services.RegisterServiceForApplication();
 var app = builder.Build();
-
+app.UseStaticFiles();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
