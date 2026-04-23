@@ -9,5 +9,6 @@ public class CityAutoMapper : Profile
     {
         CreateMap<City, CityGetDto>().ReverseMap();
         CreateMap<CityCreateDto, City>();
+        CreateMap<CityUpdateDto, City>();
     }
 }

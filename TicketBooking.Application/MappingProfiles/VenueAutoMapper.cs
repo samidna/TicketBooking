@@ -10,5 +10,6 @@ public class VenueAutoMapper : Profile
         CreateMap<Venue, VenueGetDto>()
             .ForMember(dest => dest.CityName, opt => opt.MapFrom(src => src.City.Name));
         CreateMap<VenueCreateDto, Venue>();
+        CreateMap<VenueUpdateDto, Venue>();
     }
 }

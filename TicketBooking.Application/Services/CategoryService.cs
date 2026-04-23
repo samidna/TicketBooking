@@ -44,7 +44,7 @@ public class CategoryService : ICategoryService
         await _uow.SaveChangesAsync();
     }
 
-    public async Task UpdateAsync(Guid id, CategoryCreateDto dto)
+    public async Task UpdateAsync(Guid id, CategoryUpdateDto dto)
     {
         var category = await _uow.Categories.GetByIdAsync(id);
         if (category == null) throw new NotFoundException("Category not found.");

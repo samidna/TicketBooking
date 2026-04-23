@@ -13,5 +13,7 @@ public class EventAutoMapper : Profile
             .ForMember(dest => dest.CityName, opt => opt.MapFrom(src => src.Venue.City.Name));
         CreateMap<EventCreateDto, Event>()
             .ForMember(dest => dest.ImageUrl, opt => opt.Ignore());
+        CreateMap<EventUpdateDto, Event>()
+            .ForMember(dest => dest.ImageUrl, opt => opt.Ignore());
     }
 }

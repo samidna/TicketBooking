@@ -9,5 +9,6 @@ public class CategoryAutoMapper : Profile
     {
         CreateMap<Category, CategoryGetDto>().ReverseMap();
         CreateMap<CategoryCreateDto, Category>();
+        CreateMap<CategoryUpdateDto, Category>();
     }
 }
