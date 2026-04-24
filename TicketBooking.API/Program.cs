@@ -12,6 +12,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.RegisterServiceForInfrastructure(builder.Configuration);
 builder.Services.RegisterServiceForApplication();
+
 var app = builder.Build();
 app.UseStaticFiles();
 // Configure the HTTP request pipeline.
