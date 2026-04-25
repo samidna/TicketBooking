@@ -34,7 +34,7 @@ public class ExceptionMiddleware
 
         var error = new ErrorDto
         {
-            Message = exception.Message,
+            Message = exception.Message, 
             StatusCode = (int)HttpStatusCode.InternalServerError
         };
 
@@ -44,7 +44,7 @@ public class ExceptionMiddleware
                 error.StatusCode = (int)HttpStatusCode.NotFound;
                 break;
             case AlreadyExistsException:
-                error.StatusCode= (int)HttpStatusCode.NotFound;
+                error.StatusCode = (int)HttpStatusCode.Conflict; 
                 break;
             case BadRequestException:
                 error.StatusCode = (int)HttpStatusCode.BadRequest;
@@ -53,7 +53,7 @@ public class ExceptionMiddleware
                 error.StatusCode = (int)HttpStatusCode.Unauthorized;
                 break;
             default:
-                error.Message = "An internal server error occurred."; 
+                error.StatusCode = (int)HttpStatusCode.InternalServerError;
                 break;
         }
 

@@ -9,11 +9,13 @@ public class AccountService : IAccountService
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly ITokenService _tokenService;
+    private readonly RoleManager<IdentityRole<Guid>> _roleManager;
 
-    public AccountService(UserManager<AppUser> userManager, ITokenService tokenService)
+    public AccountService(UserManager<AppUser> userManager, ITokenService tokenService, RoleManager<IdentityRole<Guid>> roleManager)
     {
         _userManager = userManager;
         _tokenService = tokenService;
+        _roleManager = roleManager;
     }
 
     public async Task RegisterAsync(UserRegisterDto dto)
@@ -31,7 +33,15 @@ public class AccountService : IAccountService
         if (!result.Succeeded)
         {
             var errors = string.Join(", ", result.Errors.Select(x => x.Description));
-            throw new Exception(errors); 
+            throw new Exception(errors);
+        }
+
+        if (!await _roleManager.RoleExistsAsync("User"))
+        {
+            await _roleManager.CreateAsync(new IdentityRole<Guid>
+            {
+                Name = "User"
+            });
         }
 
         await _userManager.AddToRoleAsync(user, "User");
