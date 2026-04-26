@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TicketBooking.Application.DTOs.Order;
 using TicketBooking.Application.Exceptions;
@@ -12,47 +13,69 @@ public class OrderService : IOrderService
 {
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _uow;
+    private readonly UserManager<AppUser> _userManager;
 
-    public OrderService(IMapper mapper, IUnitOfWork uow)
+    public OrderService(IMapper mapper, IUnitOfWork uow, UserManager<AppUser> userManager)
     {
         _mapper = mapper;
         _uow = uow;
+        _userManager = userManager;
     }
 
     public async Task<OrderGetDto> CreateOrderAsync(OrderCreateDto dto)
     {
-        var eventEntity = await _uow.Events.GetSingleAsync(x => x.Id == dto.EventId, "Venue");
+        await _uow.BeginTransactionAsync();
 
-        if (eventEntity == null) throw new NotFoundException("Event not found.");
-
-        int soldTicketsCount = await _uow.Tickets.GetWhere(x => x.EventId == dto.EventId).CountAsync();
-        if (soldTicketsCount + dto.TicketCount > eventEntity.Venue.Capacity)
-            throw new BadRequestException($"Only {eventEntity.Venue.Capacity - soldTicketsCount} tickets available for this event.");
-
-        var order = new Order
+        try
         {
-            AppUserId = dto.AppUserId,
-            CreatedAt = DateTime.Now,
-            Status = OrderStatus.Completed,
-            TotalAmount = eventEntity.Price * dto.TicketCount,
-            Tickets = new List<Ticket>()
-        };
+            var eventEntity = await _uow.Events.GetSingleAsync(x => x.Id == dto.EventId, "Venue");
+            if (eventEntity == null) throw new NotFoundException("Event not found.");
 
-        for (int i = 0; i < dto.TicketCount; i++)
-        {
-            order.Tickets.Add(new Ticket
+            int soldTicketsCount = await _uow.Tickets.GetWhere(x => x.EventId == dto.EventId).CountAsync();
+            if (soldTicketsCount + dto.TicketCount > eventEntity.Venue.Capacity)
+                throw new BadRequestException($"Only {eventEntity.Venue.Capacity - soldTicketsCount} tickets available.");
+
+            var user = await _userManager.FindByIdAsync(dto.AppUserId.ToString());
+            if (user == null) throw new NotFoundException("User not found.");
+
+            decimal totalAmount = eventEntity.Price * dto.TicketCount;
+            if (user.Balance < totalAmount)
+                throw new BadRequestException("Insufficient balance.");
+
+            user.Balance -= totalAmount;
+
+            var order = new Order
             {
-                EventId = dto.EventId,
-                TicketNumber = "T-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
-                FinalPrice = eventEntity.Price,
-                QRCodeData = $"EVENT_{dto.EventId}_USER_{dto.AppUserId}_{Guid.NewGuid()}"
-            });
+                AppUserId = dto.AppUserId,
+                CreatedAt = DateTime.UtcNow,
+                Status = OrderStatus.Completed,
+                TotalAmount = totalAmount,
+                Tickets = new List<Ticket>()
+            };
+
+            for (int i = 0; i < dto.TicketCount; i++)
+            {
+                order.Tickets.Add(new Ticket
+                {
+                    EventId = dto.EventId,
+                    TicketNumber = "T-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
+                    FinalPrice = eventEntity.Price,
+                    QRCodeData = $"EVENT_{dto.EventId}_USER_{dto.AppUserId}_{Guid.NewGuid()}"
+                });
+            }
+
+            await _uow.Orders.AddAsync(order);
+            await _uow.SaveChangesAsync(); 
+
+            await _uow.CommitTransactionAsync();
+
+            return _mapper.Map<OrderGetDto>(order);
         }
-
-        await _uow.Orders.AddAsync(order);
-        await _uow.SaveChangesAsync();
-
-        return _mapper.Map<OrderGetDto>(order);
+        catch (Exception)
+        {   
+            await _uow.RollbackTransactionAsync();
+            throw;
+        }
     }
 
     public async Task<OrderGetDto> GetOrderByIdAsync(Guid id)

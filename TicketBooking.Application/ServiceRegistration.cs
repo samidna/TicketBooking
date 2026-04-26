@@ -14,5 +14,10 @@ public static class ServiceRegistration
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         services.AddFluentValidationAutoValidation();
         services.AddScoped<IAccountService, AccountService>();
+        services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<IVenueService, VenueService>();
+        services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<IEventService, EventService>();
+        services.AddScoped<ICityService, CityService>();
     }
 }

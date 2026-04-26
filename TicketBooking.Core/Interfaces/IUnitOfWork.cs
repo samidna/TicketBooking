@@ -8,5 +8,8 @@ public interface IUnitOfWork : IDisposable
     ICategoryRepository Categories { get; }
     IOrderRepository Orders { get; }
 
+    Task BeginTransactionAsync();
+    Task CommitTransactionAsync();
+    Task RollbackTransactionAsync();
     Task<int> SaveChangesAsync();
 }

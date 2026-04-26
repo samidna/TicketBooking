@@ -1,4 +1,5 @@
-﻿using TicketBooking.Core.Interfaces;
+﻿using Microsoft.EntityFrameworkCore.Storage;
+using TicketBooking.Core.Interfaces;
 using TicketBooking.Infrastructure.Data;
 
 namespace TicketBooking.Infrastructure.Repositories;
@@ -12,8 +13,12 @@ public class UnitOfWork : IUnitOfWork
     private IVenueRepository _venueRepository;
     private ICategoryRepository _categoryRepository;
     private IOrderRepository _orderRepository;
+    private IDbContextTransaction _transaction;
 
-    public UnitOfWork(AppDbContext context) => _context = context;
+    public UnitOfWork(AppDbContext context)
+    {
+        _context = context;
+    }
 
     public IEventRepository Events => _eventRepository ??= new EventRepository(_context);
     public ITicketRepository Tickets => _ticketRepository ??= new TicketRepository(_context);
@@ -25,4 +30,41 @@ public class UnitOfWork : IUnitOfWork
     public async Task<int> SaveChangesAsync() => await _context.SaveChangesAsync();
 
     public void Dispose() => _context.Dispose();
+
+    public async Task BeginTransactionAsync()
+    {
+        _transaction = await _context.Database.BeginTransactionAsync();
+    }
+
+    public async Task CommitTransactionAsync()
+    {
+        try
+        {
+            await _context.SaveChangesAsync();
+            await _transaction.CommitAsync();
+        }
+        catch
+        {
+            await RollbackTransactionAsync();
+            throw;
+        }
+        finally
+        {
+            if (_transaction != null)
+            {
+                await _transaction.DisposeAsync();
+                _transaction = null;
+            }
+        }
+    }
+
+    public async Task RollbackTransactionAsync()
+    {
+        if (_transaction != null)
+        {
+            await _transaction.RollbackAsync();
+            await _transaction.DisposeAsync();
+            _transaction = null;
+        }
+    }
 }

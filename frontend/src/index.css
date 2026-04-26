@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
+
+:root {
+  --primary: #6366f1; /* Canlı Bənövşəyi-Göy */
+  --secondary: #a855f7; /* Bənövşəyi */
+  --dark: #0f172a; /* Çox tünd göy (Fon üçün) */
+  --card-bg: #1e293b; /* Kart fonu */
+  --text: #f8fafc;
+}
+
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--dark);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+* { box-sizing: border-box; }
