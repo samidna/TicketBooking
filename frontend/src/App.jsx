@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   return (
@@ -13,7 +14,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/blog" element={<div style={{textAlign:'center', marginTop:'50px'}}><h1>Blog</h1><p>Coming soon...</p></div>} />
+          <Route path="/blog" element={<div style={{ textAlign: 'center', marginTop: '50px' }}><h1>Blog</h1><p>Coming soon...</p></div>} />
+          <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </div>
       <footer style={styles.footer}>
