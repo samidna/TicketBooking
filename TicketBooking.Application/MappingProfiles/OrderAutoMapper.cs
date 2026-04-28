@@ -9,5 +9,7 @@ public class OrderAutoMapper : Profile
     {
         CreateMap<Order, OrderGetDto>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+        CreateMap<Order,OrderDetailDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
     }
 }

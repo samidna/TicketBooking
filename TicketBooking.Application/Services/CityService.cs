@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using TicketBooking.Application.DTOs.City;
+using TicketBooking.Application.DTOs.Pagination;
 using TicketBooking.Application.Exceptions;
 using TicketBooking.Application.Interfaces;
 using TicketBooking.Core.Entities;
@@ -78,5 +79,24 @@ public class CityService : ICityService
         var city = await _uow.Cities.GetByIdAsync(id);
         if (city == null) throw new NotFoundException("City not found.");
         return _mapper.Map<CityGetDto>(city);
+    }
+
+    public async Task<PagedResponse<CityGetDto>> GetCitiesPagedAsync(int page, int pageSize)
+    {
+        var query = _uow.Cities.GetAll();
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .OrderByDescending(e => e.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(c=>new CityGetDto
+            {
+                Name = c.Name
+            })
+            .ToListAsync();
+
+        return new PagedResponse<CityGetDto>(items, totalCount, page, pageSize);
     }
 }

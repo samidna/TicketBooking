@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using TicketBooking.Application.DTOs.Event;
+using TicketBooking.Application.DTOs.Pagination;
 using TicketBooking.Application.Exceptions;
 using TicketBooking.Application.Interfaces;
 using TicketBooking.Core.Entities;
@@ -97,5 +98,27 @@ public class EventService : IEventService
 
         _uow.Events.Remove(eventEntity);
         await _uow.SaveChangesAsync();
+    }
+
+    public async Task<PagedResponse<EventGetDto>> GetEventsPagedAsync(int page, int pageSize)
+    {
+        var query = _uow.Events.GetAll();
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .OrderByDescending(e => e.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(e=>new EventGetDto
+            {
+                Title = e.Title,
+                Description = e.Description,
+                ImageUrl = e.ImageUrl,
+                EventDate = e.EventDate,
+            })
+            .ToListAsync();
+
+        return new PagedResponse<EventGetDto>(items, totalCount, page, pageSize);
     }
 }

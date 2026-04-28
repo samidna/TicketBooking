@@ -1,109 +1,138 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import api from '../api';
 
 const AdminDashboard = () => {
+  const [data, setData] = useState([]);
+  const [activeTab, setActiveTab] = useState('events');
   const [events, setEvents] = useState([]);
-  const [newEvent, setNewEvent] = useState({ name: '', description: '', price: 0 });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const pageSize = 5;
 
   useEffect(() => {
-    fetchEvents();
-  }, []);
+    fetchData(currentPage);
+  }, [activeTab, currentPage]);
 
-  const fetchEvents = () => {
-    api.get('/Events').then(res => setEvents(res.data));
-  };
-
-  const handleCreate = async (e) => {
-    e.preventDefault();
+  const fetchData = async () => {
+    setLoading(true);
     try {
-      await api.post('/Events', newEvent);
-      setNewEvent({ name: '', description: '', price: 0 });
-      fetchEvents(); // Siyahını yenilə
-      alert("Tədbir uğurla əlavə edildi!");
+      const endpoint = (activeTab.toLowerCase() === 'users' ? 'Account' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1));
+
+      const response = await api.get(`${endpoint}?page=${currentPage}&pageSize=${pageSize}`);
+
+      if (response.data && response.data.items) {
+        setData(response.data.items);
+        setTotalCount(response.data.totalCount);
+      } else {
+        setData(response.data);
+      }
     } catch (err) {
-      console.error(err);
+      console.error("Məlumat gətirilərkən xəta:", err);
+      setData([]);
     }
+    setLoading(false);
   };
 
-  const handleDelete = async (id) => {
-    if(window.confirm("Silmək istədiyinizə əminsiniz?")) {
-      await api.delete(`/Events/${id}`);
-      fetchEvents();
-    }
+  const getColumns = () => {
+    if (data.length === 0) return [];
+    return Object.keys(data[0]).filter(key => key !== 'password');
   };
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>Admin Control Panel</h1>
-      
-      {/* Yeni Tədbir Əlavə Etmə Formu */}
-      <section style={styles.section}>
-        <h2>Add New Event</h2>
-        <form onSubmit={handleCreate} style={styles.form}>
-          <input 
-            type="text" placeholder="Event Name" 
-            value={newEvent.name} 
-            onChange={e => setNewEvent({...newEvent, name: e.target.value})} 
-            style={styles.input} required
-          />
-          <input 
-            type="number" placeholder="Price" 
-            value={newEvent.price} 
-            onChange={e => setNewEvent({...newEvent, price: e.target.value})} 
-            style={styles.input} required
-          />
-          <textarea 
-            placeholder="Description" 
-            value={newEvent.description} 
-            onChange={e => setNewEvent({...newEvent, description: e.target.value})} 
-            style={styles.textarea} required
-          />
-          <button type="submit" style={styles.addBtn}>Save Event</button>
-        </form>
-      </section>
+    <div style={styles.wrapper}>
+      {/* SIDEBAR */}
+      <aside style={styles.sidebar}>
+        <h2 style={styles.logo}>TICKET<span style={{ color: '#818cf8' }}>ADMIN</span></h2>
+        <nav>
+          <div
+            onClick={() => { setActiveTab('events'); setCurrentPage(1); }}
+            style={activeTab === 'events' ? styles.activeItem : styles.menuItem}>
+            📅 Events
+          </div>
+          <div
+            onClick={() => { setActiveTab('users'); setCurrentPage(1); }}
+            style={activeTab === 'users' ? styles.activeItem : styles.menuItem}>
+            👥 Users
+          </div>
+          <div
+            onClick={() => { setActiveTab('tickets'); setCurrentPage(1); }}
+            style={activeTab === 'tickets' ? styles.activeItem : styles.menuItem}>
+            🎫 Tickets (Transactions)
+          </div>
+          <div
+            onClick={() => { setActiveTab('blogs'); setCurrentPage(1); }}
+            style={activeTab === 'blogs' ? styles.activeItem : styles.menuItem}>
+            ✍️ Blog Posts
+          </div>
+        </nav>
+      </aside>
 
-      {/* Mövcud Tədbirlər Cədvəli */}
-      <section style={styles.section}>
-        <h2>Manage Events</h2>
-        <table style={styles.table}>
-          <thead>
-            <tr>
-              <th style={styles.th}>ID</th>
-              <th style={styles.th}>Name</th>
-              <th style={styles.th}>Price</th>
-              <th style={styles.th}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {events.map(event => (
-              <tr key={event.id} style={styles.tr}>
-                <td style={styles.td}>{event.id}</td>
-                <td style={styles.td}>{event.name}</td>
-                <td style={styles.td}>${event.price}</td>
-                <td style={styles.td}>
-                  <button onClick={() => handleDelete(event.id)} style={styles.delBtn}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+      {/* MAIN CONTENT */}
+      <main style={styles.main}>
+        <header style={styles.header}>
+          <h2>{activeTab.toUpperCase()} Management</h2>
+          <button style={styles.addBtn}>+ Add New {activeTab.slice(0, -1)}</button>
+        </header>
+
+        <div style={styles.tableCard}>
+          {/* {loading ? <p>Yüklənir...</p> : ( */}
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  {getColumns().map(col => (
+                    <th key={col} style={styles.th}>{col.toUpperCase()}</th>
+                  ))}
+                  <th style={styles.th}>ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.map((item, index) => (
+                  <tr key={index} style={styles.tr}>
+                    {getColumns().map(col => (
+                      <td key={col} style={styles.td}>
+                        {typeof item[col] === 'object' ? 'Link/Object' : String(item[col])}
+                      </td>
+                    ))}
+                    <td style={styles.td}>
+                      <button style={styles.editBtn}>Edit</button>
+                      <button style={styles.delBtn}>Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          {/* )} */}
+
+          {/* PAGINATION */}
+          <div style={styles.pagination}>
+            <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)} style={styles.pageBtn}>Prev</button>
+            <span style={{ color: '#fff' }}>Page {currentPage}</span>
+            <button onClick={() => setCurrentPage(p => p + 1)} style={styles.pageBtn}>Next</button>
+          </div>
+        </div>
+      </main>
     </div>
   );
 };
 
 const styles = {
-  container: { padding: '40px 8%', color: '#fff', backgroundColor: '#0f172a', minHeight: '100vh' },
-  title: { fontSize: '32px', marginBottom: '30px', color: '#818cf8' },
-  section: { background: '#1e293b', padding: '30px', borderRadius: '15px', marginBottom: '40px' },
-  form: { display: 'flex', flexDirection: 'column', gap: '15px', maxWidth: '400px' },
-  input: { padding: '12px', borderRadius: '8px', border: 'none', background: '#334155', color: '#fff' },
-  textarea: { padding: '12px', borderRadius: '8px', border: 'none', background: '#334155', color: '#fff', height: '100px' },
-  addBtn: { background: '#10b981', color: '#fff', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' },
-  table: { width: '100%', borderCollapse: 'collapse', marginTop: '20px' },
-  th: { textAlign: 'left', padding: '15px', borderBottom: '1px solid #334155', color: '#94a3b8' },
-  td: { padding: '15px', borderBottom: '1px solid #334155' },
-  delBtn: { background: '#ef4444', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '5px', cursor: 'pointer' }
+  wrapper: { display: 'flex', minHeight: '100vh', background: '#0f172a', fontFamily: 'Poppins, sans-serif' },
+  sidebar: { width: '250px', background: '#1e293b', padding: '30px 15px', borderRight: '1px solid #334155' },
+  logo: { color: '#fff', textAlign: 'center', marginBottom: '40px', fontSize: '20px' },
+  menuItem: { fontSize: '12px', padding: '12px 20px', color: '#94a3b8', cursor: 'pointer', borderRadius: '8px', marginBottom: '10px' },
+  activeItem: { fontSize: '14px', padding: '12px 20px', color: '#fff', background: '#334155', cursor: 'pointer', borderRadius: '8px', marginBottom: '10px', fontWeight: 'bold' },
+  main: { flex: 1, padding: '40px' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', color: '#fff' },
+  addBtn: { background: '#6366f1', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' },
+  tableCard: { background: '#1e293b', padding: '20px', borderRadius: '15px', overflowX: 'auto' },
+  table: { width: '100%', borderCollapse: 'collapse', color: '#cbd5e1' },
+  th: { textAlign: 'left', padding: '12px', borderBottom: '2px solid #334155', fontSize: '13px' },
+  td: { padding: '12px', borderBottom: '1px solid #334155', fontSize: '14px' },
+  editBtn: { background: '#f59e0b', border: 'none', padding: '5px 10px', borderRadius: '4px', marginRight: '5px', cursor: 'pointer' },
+  delBtn: { background: '#ef4444', border: 'none', padding: '5px 10px', borderRadius: '4px', color: '#fff', cursor: 'pointer' },
+  pagination: { display: 'flex', justifyContent: 'center', marginTop: '20px', gap: '20px', alignItems: 'center' },
+  pageBtn: { background: '#334155', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '5px', cursor: 'pointer' }
 };
 
 export default AdminDashboard;

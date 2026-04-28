@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TicketBooking.Application.DTOs.Venue;
 using TicketBooking.Application.Interfaces;
+using TicketBooking.Application.Services;
 
 namespace TicketBooking.API.Controllers;
 [Route("api/[controller]")]
@@ -15,7 +16,7 @@ public class VenuesController : ControllerBase
         _venueService = venueService;
     }
 
-    [HttpGet]
+    [HttpGet("all")]
     public async Task<IActionResult> GetAll()
     {
         var venues = await _venueService.GetAllAsync();
@@ -51,5 +52,12 @@ public class VenuesController : ControllerBase
     {
         await _venueService.DeleteAsync(id);
         return Ok("Venue deleted successfully.");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var result = await _venueService.GetVenuesPagedAsync(page, pageSize);
+        return Ok(result);
     }
 }

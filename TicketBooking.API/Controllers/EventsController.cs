@@ -15,7 +15,7 @@ public class EventsController : ControllerBase
         _eventService = eventService;
     }
 
-    [HttpGet]
+    [HttpGet("all")]
     public async Task<IActionResult> GetAll()
     {
         var events = await _eventService.GetAllAsync();
@@ -51,5 +51,12 @@ public class EventsController : ControllerBase
     {
         await _eventService.DeleteAsync(id);
         return Ok("Event deleted successfully.");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var result = await _eventService.GetEventsPagedAsync(page, pageSize);
+        return Ok(result);
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TicketBooking.Application.DTOs.City;
 using TicketBooking.Application.Interfaces;
+using TicketBooking.Application.Services;
 
 namespace TicketBooking.API.Controllers;
 [Route("api/[controller]")]
@@ -15,7 +16,7 @@ public class CitiesController : ControllerBase
         _cityService = cityService;
     }
 
-    [HttpGet]
+    [HttpGet("all")]
     public async Task<IActionResult> GetAll()
     {
         var cities = await _cityService.GetAllAsync();
@@ -49,5 +50,12 @@ public class CitiesController : ControllerBase
     {
         await _cityService.DeleteAsync(id);
         return Ok("City deleted successfully.");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var result = await _cityService.GetCitiesPagedAsync(page, pageSize);
+        return Ok(result);
     }
 }

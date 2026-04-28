@@ -6,9 +6,12 @@ import Contact from './pages/Contact';
 import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
+
+  const isAdminPath = location.pathname.startsWith('/admin');
+
   return (
     <Router>
-      <Navbar />
+      {!isAdminPath && <Navbar />}
       <div style={{ minHeight: '80vh' }}>
         <Routes>
           <Route path="/" element={<Home />} />

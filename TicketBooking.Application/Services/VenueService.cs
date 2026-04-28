@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using TicketBooking.Application.DTOs.City;
+using TicketBooking.Application.DTOs.Pagination;
 using TicketBooking.Application.DTOs.Venue;
 using TicketBooking.Application.Exceptions;
 using TicketBooking.Application.Interfaces;
@@ -55,7 +56,7 @@ public class VenueService : IVenueService
             bool exists = await _uow.Venues
                 .GetWhere(x => x.Name.ToLower() == dto.Name.Trim().ToLower()
                             && x.CityId == dto.CityId
-                            && x.Id != dto.Id) 
+                            && x.Id != dto.Id)
                 .AnyAsync();
 
             if (exists)
@@ -92,5 +93,28 @@ public class VenueService : IVenueService
         var venue = await _uow.Venues.GetByIdAsync(id);
         if (venue == null) throw new NotFoundException("Venue not found.");
         return _mapper.Map<VenueGetDto>(venue);
+    }
+
+    public async Task<PagedResponse<VenueGetDto>> GetVenuesPagedAsync(int page, int pageSize)
+    {
+        var query = _uow.Venues.GetAll();
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .OrderByDescending(e => e.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(v => new VenueGetDto
+            {
+                Id = v.Id,
+                Name = v.Name,
+                Address = v.Address,
+                Capacity = v.Capacity,
+                CityName = v.City.Name
+            })
+            .ToListAsync();
+
+        return new PagedResponse<VenueGetDto>(items, totalCount, page, pageSize);
     }
 }

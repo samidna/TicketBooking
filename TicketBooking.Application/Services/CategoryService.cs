@@ -2,6 +2,7 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using TicketBooking.Application.DTOs.Category;
+using TicketBooking.Application.DTOs.Pagination;
 using TicketBooking.Application.Exceptions;
 using TicketBooking.Application.Interfaces;
 using TicketBooking.Core.Entities;
@@ -74,5 +75,24 @@ public class CategoryService : ICategoryService
 
         _uow.Categories.Remove(category);
         await _uow.SaveChangesAsync();
+    }
+
+    public async Task<PagedResponse<CategoryGetDto>> GetCategoriesPagedAsync(int page, int pageSize)
+    {
+        var query = _uow.Categories.GetAll();
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .OrderByDescending(e => e.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(c => new CategoryGetDto
+            {
+                Name = c.Name
+            })
+            .ToListAsync();
+
+        return new PagedResponse<CategoryGetDto>(items, totalCount, page, pageSize);
     }
 }

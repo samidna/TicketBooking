@@ -7,9 +7,10 @@ public class TicketAutoMapper : Profile
 {
     public TicketAutoMapper()
     {
-        CreateMap<Ticket, TicketGetDto>()
+        CreateMap<Ticket, TicketDetailDto>()
             .ForMember(dest => dest.EventTitle, opt => opt.MapFrom(src => src.Event.Title))
             .ForMember(dest => dest.VenueName, opt => opt.MapFrom(src => src.Event.Venue.Name));
+        CreateMap<Ticket, TicketGetDto>();
         CreateMap<TicketCreateDto, Ticket>();
     }
 }

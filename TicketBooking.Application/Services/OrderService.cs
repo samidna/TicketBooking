@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TicketBooking.Application.DTOs.Order;
+using TicketBooking.Application.DTOs.Pagination;
 using TicketBooking.Application.Exceptions;
 using TicketBooking.Application.Interfaces;
 using TicketBooking.Core.Entities;
@@ -65,14 +66,14 @@ public class OrderService : IOrderService
             }
 
             await _uow.Orders.AddAsync(order);
-            await _uow.SaveChangesAsync(); 
+            await _uow.SaveChangesAsync();
 
             await _uow.CommitTransactionAsync();
 
             return _mapper.Map<OrderGetDto>(order);
         }
         catch (Exception)
-        {   
+        {
             await _uow.RollbackTransactionAsync();
             throw;
         }
@@ -96,5 +97,28 @@ public class OrderService : IOrderService
             .ToListAsync();
 
         return _mapper.Map<List<OrderGetDto>>(orders);
+    }
+
+    public async Task<PagedResponse<OrderGetDto>> GetOrdersPagedAsync(int page, int pageSize)
+    {
+        var query = _uow.Orders.GetAll();
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .OrderByDescending(e => e.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(o => new OrderGetDto
+            {
+                Id = o.Id,
+                OrderDate = o.CreatedAt,
+                TotalAmount = o.TotalAmount,
+                Status = o.Status.ToString(),
+                OwnerUsername = o.AppUser.UserName,
+            })
+            .ToListAsync();
+
+        return new PagedResponse<OrderGetDto>(items, totalCount, page, pageSize);
     }
 }

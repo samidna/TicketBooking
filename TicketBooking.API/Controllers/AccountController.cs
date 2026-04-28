@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TicketBooking.Application.DTOs.User;
 using TicketBooking.Application.Interfaces;
+using TicketBooking.Application.Services;
 
 namespace TicketBooking.API.Controllers;
 [Route("api/[controller]")]
@@ -22,6 +23,13 @@ public class AccountController : ControllerBase
     public async Task<IActionResult> Login(UserLoginDto dto)
     {
         var result = await _accountService.LoginAsync(dto);
+        return Ok(result);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var result = await _accountService.GetUsersPagedAsync(page, pageSize);
         return Ok(result);
     }
 }

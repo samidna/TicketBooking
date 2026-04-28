@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TicketBooking.Application.DTOs.Order;
 using TicketBooking.Application.Interfaces;
+using TicketBooking.Application.Services;
 
 namespace TicketBooking.API.Controllers;
 [Route("api/[controller]")]
@@ -34,5 +35,12 @@ public class OrdersController : ControllerBase
     {
         var orders = await _orderService.GetUserOrdersAsync(userId);
         return Ok(orders);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var result = await _orderService.GetOrdersPagedAsync(page, pageSize);
+        return Ok(result);
     }
 }

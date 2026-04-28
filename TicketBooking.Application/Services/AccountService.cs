@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using TicketBooking.Application.DTOs.Pagination;
 using TicketBooking.Application.DTOs.User;
 using TicketBooking.Application.Interfaces;
 using TicketBooking.Core.Entities;
@@ -63,5 +65,27 @@ public class AccountService : IAccountService
             Username = user.UserName,
             Expiration = DateTime.Now.AddMinutes(60)
         };
+    }
+
+    public async Task<PagedResponse<UserGetDto>> GetUsersPagedAsync(int page, int pageSize)
+    {
+        var query = _userManager.Users;
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .OrderByDescending(e => e.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(u => new UserGetDto
+            {
+                Name = u.Name,
+                Surname = u.Surname,
+                Phone = u.PhoneNumber,
+                Username = u.UserName,
+                Email = u.Email
+            }).ToListAsync();
+
+        return new PagedResponse<UserGetDto>(items, totalCount, page, pageSize);
     }
 }

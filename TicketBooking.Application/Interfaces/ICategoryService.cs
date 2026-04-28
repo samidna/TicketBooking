@@ -1,4 +1,6 @@
 ﻿using TicketBooking.Application.DTOs.Category;
+using TicketBooking.Application.DTOs.Pagination;
+using TicketBooking.Core.Entities;
 
 namespace TicketBooking.Application.Interfaces;
 public interface ICategoryService
@@ -8,4 +10,5 @@ public interface ICategoryService
     Task CreateAsync(CategoryCreateDto dto);
     Task UpdateAsync(Guid id, CategoryUpdateDto dto);
     Task DeleteAsync(Guid id);
+    Task<PagedResponse<CategoryGetDto>> GetCategoriesPagedAsync(int page, int pageSize);
 }

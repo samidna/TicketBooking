@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TicketBooking.Application.DTOs.Category;
 using TicketBooking.Application.Interfaces;
+using TicketBooking.Application.Services;
 
 namespace TicketBooking.API.Controllers;
 [Route("api/[controller]")]
@@ -15,7 +16,7 @@ public class CategoriesController : ControllerBase
         _categoryService = categoryService;
     }
 
-    [HttpGet]
+    [HttpGet("all")]
     public async Task<IActionResult> GetAll()
     {
         var categories = await _categoryService.GetAllAsync();
@@ -51,5 +52,12 @@ public class CategoriesController : ControllerBase
     {
         await _categoryService.DeleteAsync(id);
         return Ok("Category deleted successfully.");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var result = await _categoryService.GetCategoriesPagedAsync(page, pageSize);
+        return Ok(result);
     }
 }
