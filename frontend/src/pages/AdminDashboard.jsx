@@ -65,6 +65,16 @@ const AdminDashboard = () => {
             style={activeTab === 'blogs' ? styles.activeItem : styles.menuItem}>
             ✍️ Blog Posts
           </div>
+          <div
+            onClick={() => { setActiveTab('venues'); setCurrentPage(1); }}
+            style={activeTab === 'venues' ? styles.activeItem : styles.menuItem}>
+            📍 Venues
+          </div>   
+          <div
+            onClick={() => { setActiveTab('orders'); setCurrentPage(1); }}
+            style={activeTab === 'orders' ? styles.activeItem : styles.menuItem}>
+            📦 Orders
+          </div>
         </nav>
       </aside>
 
@@ -77,31 +87,31 @@ const AdminDashboard = () => {
 
         <div style={styles.tableCard}>
           {/* {loading ? <p>Yüklənir...</p> : ( */}
-            <table style={styles.table}>
-              <thead>
-                <tr>
-                  {getColumns().map(col => (
-                    <th key={col} style={styles.th}>{col.toUpperCase()}</th>
-                  ))}
-                  <th style={styles.th}>ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.map((item, index) => (
-                  <tr key={index} style={styles.tr}>
-                    {getColumns().map(col => (
-                      <td key={col} style={styles.td}>
-                        {typeof item[col] === 'object' ? 'Link/Object' : String(item[col])}
-                      </td>
-                    ))}
-                    <td style={styles.td}>
-                      <button style={styles.editBtn}>Edit</button>
-                      <button style={styles.delBtn}>Delete</button>
-                    </td>
-                  </tr>
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                {getColumns().map(col => (
+                  <th key={col} style={styles.th}>{col.toUpperCase()}</th>
                 ))}
-              </tbody>
-            </table>
+                <th style={styles.th}>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((item, index) => (
+                <tr key={index} style={styles.tr}>
+                  {getColumns().map(col => (
+                    <td key={col} style={styles.td}>
+                      {typeof item[col] === 'object' ? 'Link/Object' : String(item[col])}
+                    </td>
+                  ))}
+                  <td style={styles.td}>
+                    <button style={styles.editBtn}>Edit</button>
+                    <button style={styles.delBtn}>Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
           {/* )} */}
 
           {/* PAGINATION */}
